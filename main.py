@@ -1,16 +1,8 @@
-from qbittorrent import Client
 from bs4 import BeautifulSoup as soup
 import argparse
 import colorama
 import requests
-
-
-#qb = Client('http://127.0.0.1:8080/')
-#qb.login('admin', 'adminadmin')
-
-#torrent_file = open("The.Falcon.and.The.Winter.Soldier.S01E03.Power.Broker.1080p.DSNP.WEBRip.DDP5.1.x264-TOMMY[rartv]-[rarbg.to].torrent", 'rb')
-
-#qb.download_from_file(torrent_file)
+import os
 
 
 class Get_Connection:
@@ -93,7 +85,7 @@ class Get_Movies:
                 f'[!!] Something went wrong! {err}', colorama.Style.RESET_ALL)
 
     def dl_torrent(self, torrent_url):
-        import re, os, traceback
+        import re, traceback
         folder_name = 'torrents'
         if not os.path.exists(folder_name):
             os.mkdir(folder_name)
@@ -117,6 +109,45 @@ class Get_Movies:
             print(colorama.Fore.RED,
                 traceback.format_exc(), colorama.Style.RESET_ALL)
 
+class Torrents:
+
+    def movies_dl(self):
+        import qbittorrent
+        origin = os.getcwd()
+        try:
+            qbit = qbittorrent.Client('http://127.0.0.1:8080/')
+            qbit.login('admin', 'adminadmin')
+
+            os.chdir(os.path.join(origin, 'torrents'))
+            if os.listdir() == []:
+                print(colorama.Fore.YELLOW,
+                    '[!] No Torrents Downloaded', colorama.Style.RESET_ALL)
+            else:
+                for torrent in os.listdir():
+                    tor_dl = open(torrent, 'rb')
+                    qbit.download_from_file(tor_dl, savefile=os.path.join(origin, 'torrents'))
+                    Torrents().check_torrent_status()
+
+                    os.remove(torrent)
+            os.chdir(origin)
+        except SystemError as syserr:
+            print(colorama.Fore.RED,
+                f'[!!] Something went wrong! {syserr}',
+                colorama.Style.RESET_ALL)
+    
+    def check_torrent_status(self):
+        import qbittorrentapi
+        try:
+            client = qbittorrentapi.Client(host='localhost:8080', username='admin', password='adminadmin')
+
+            for torrent in client.torrents_info():
+                state_enum = qbittorrentapi.TorrentStates(torrent.state)
+                print(colorama.Fore.YELLOW,
+                    f'[!] {torrent.name}: {state_enum.value}', colorama.Style.RESET_ALL)
+        except SystemError as syserr:
+            print(colorama.Fore.RED,
+                f'[!!] Something went wrong! {syserr}', colorama.Style.RESET_ALL)
+
 
 if __name__ == '__main__':
     colorama.init()
@@ -125,8 +156,22 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--search',
                         nargs=1, metavar='SEARCH',
                         action='store',
-                        help="Searches for movie.")
+                        help="Searches for the movie. (e.g. --search 'avengers')")
+
+    parser.add_argument('-d', '--downloadtorrents',
+                        action='store_true',
+                        help='Downloads torrent files in the torrents directory')
+
+    parser.add_argument('-c', '--checkstatus',
+                        action='store_true',
+                        help='Checks torrent status on qbittorrent localhost server')
 
     args = parser.parse_args()
     if args.search:
         Get_Connection([x for x in args.search]).conn()
+
+    if args.downloadtorrents:
+        Torrents().movies_dl()
+
+    if args.checkstatus:
+        Torrents().check_torrent_status()
