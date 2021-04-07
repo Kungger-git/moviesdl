@@ -167,7 +167,7 @@ class Torrents:
                             f"[!] {torrent.name} is downloading.. Progress: {'{:.0%}'.format(torrent.progress)}",
                             colorama.Style.RESET_ALL)
                         print(colorama.Fore.YELLOW,
-                            f'[!] Seeders: {torrent.num_seeds} Peers: {torret.num_leechs}',
+                            f'[!] Seeders: {torrent.num_seeds} Peers: {torrent.num_leechs}',
                             colorama.Style.RESET_ALL)
                         print(colorama.Fore.YELLOW,
                             '[!] Downloaded: {:,} bytes'.format(torrent.completed),
