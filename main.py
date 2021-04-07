@@ -13,7 +13,7 @@ class Get_Connection:
 
     def conn(self):
         try:
-            url = f'https://yts.mx/browse-movies/{self.query}/all/all/0/rating/0/en'
+            url = f'https://yts.mx/browse-movies/{self.query}/all/all/0/rating/0/all'
             with requests.get(url) as response:
                 response.raise_for_status()
                 page_soup = soup(response.text, 'html.parser')
@@ -39,19 +39,24 @@ class Get_Movies:
                 for title in data_set[title_index]:
                     print(f'{index} : {title}')
 
-        while True:
-            selection = int(input('\n\nSelect the index of the movie to download: '))
-            if not selection in data_set:
-                print(colorama.Fore.RED,
-                    f'[!!] {selection} is not a valid selection',
-                    colorama.Style.RESET_ALL)
-            else:
-                for title in data_set[selection]:
-                    print(colorama.Fore.YELLOW,
-                        f'[!] {title} has been selected\n\n', colorama.Style.RESET_ALL)
-                    print(colorama.Fore.GREEN,
-                        f'[*] Getting Available Video Qualities for {title}', colorama.Style.RESET_ALL)
-                    return Get_Movies(self.query, self.locator).find_torrent(data_set[selection][title])
+        if not data_set == {}:
+            while True:
+                selection = int(input('\n\nSelect the index of the movie to download: '))
+                if not selection in data_set:
+                    print(colorama.Fore.RED,
+                        f'[!!] {selection} is not a valid selection',
+                        colorama.Style.RESET_ALL)
+                else:
+                    for title in data_set[selection]:
+                        print(colorama.Fore.YELLOW,
+                            f'[!] {title} has been selected\n\n', colorama.Style.RESET_ALL)
+                        print(colorama.Fore.GREEN,
+                            f'[*] Getting Available Video Qualities for {title}', colorama.Style.RESET_ALL)
+                        return Get_Movies(self.query, self.locator).find_torrent(data_set[selection][title])
+        else:
+            print(colorama.Fore.YELLOW,
+                f'[!] There are no results for {self.query}',
+                colorama.Style.RESET_ALL)
 
     def find_torrent(self, url):
         try:
@@ -125,7 +130,7 @@ class Torrents:
             else:
                 for torrent in os.listdir():
                     tor_dl = open(torrent, 'rb')
-                    qbit.download_from_file(tor_dl, savefile=os.path.join(origin, 'torrents'))
+                    qbit.download_from_file(tor_dl, savepath=os.path.join(origin, 'torrents'))
                     Torrents().check_torrent_status()
 
                     os.remove(torrent)
@@ -140,13 +145,31 @@ class Torrents:
         try:
             client = qbittorrentapi.Client(host='localhost:8080', username='admin', password='adminadmin')
 
+            print(colorama.Fore.GREEN,
+                f'[*] You have {len(client.torrents_info())} Torrent{plural_s(len(client.torrents_info()))}',
+                colorama.Style.RESET_ALL)
             for torrent in client.torrents_info():
                 state_enum = qbittorrentapi.TorrentStates(torrent.state)
-                print(colorama.Fore.YELLOW,
-                    f'[!] {torrent.name}: {state_enum.value}', colorama.Style.RESET_ALL)
+                torrent_states = {'downloading': torrent.state_enum.is_downloading,
+                          'complete': torrent.state_enum.is_complete}
+                if torrent.state_enum.is_errored:
+                    print(colorama.Fore.YELLOW,
+                        f'[!] Deleting {torrent.name} because its current state is errored',
+                        colorama.Style.RESET_ALL)
+                    client.torrents_delete(delete_files=True, torrent_hashes=[torrent.hash])
+                else:
+                    for state in torrent_states:
+                        if torrent_states[state]:
+                            print(colorama.Fore.YELLOW,
+                                f'[!] {torrent.name} is {state}',
+                                colorama.Style.RESET_ALL)
         except SystemError as syserr:
             print(colorama.Fore.RED,
                 f'[!!] Something went wrong! {syserr}', colorama.Style.RESET_ALL)
+
+
+def plural_s(v):
+    return 's' if not abs(v) == 1 else ''
 
 
 if __name__ == '__main__':
