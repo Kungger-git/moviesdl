@@ -130,7 +130,7 @@ class Torrents:
             else:
                 for torrent in os.listdir():
                     tor_dl = open(torrent, 'rb')
-                    qbit.download_from_file(tor_dl, savepath=os.path.join(origin, 'torrents'))
+                    qbit.download_from_file(tor_dl)
                     Torrents().check_torrent_status()
 
                     os.remove(torrent)
@@ -148,21 +148,45 @@ class Torrents:
             print(colorama.Fore.GREEN,
                 f'[*] You have {len(client.torrents_info())} Torrent{plural_s(len(client.torrents_info()))}',
                 colorama.Style.RESET_ALL)
-            for torrent in client.torrents_info():
-                state_enum = qbittorrentapi.TorrentStates(torrent.state)
-                torrent_states = {'downloading': torrent.state_enum.is_downloading,
-                          'complete': torrent.state_enum.is_complete}
-                if torrent.state_enum.is_errored:
-                    print(colorama.Fore.YELLOW,
-                        f'[!] Deleting {torrent.name} because its current state is errored',
-                        colorama.Style.RESET_ALL)
-                    client.torrents_delete(delete_files=True, torrent_hashes=[torrent.hash])
-                else:
-                    for state in torrent_states:
-                        if torrent_states[state]:
-                            print(colorama.Fore.YELLOW,
-                                f'[!] {torrent.name} is {state}',
-                                colorama.Style.RESET_ALL)
+            for torrent_index, torrent in enumerate(client.torrents_info(), start=1):
+                if args.downloadtorrents or args.checktorrentstatus:
+                    state_enum = qbittorrentapi.TorrentStates(torrent.state)
+                    torrent_states = {'downloading': torrent.state_enum.is_downloading,
+                              'complete': torrent.state_enum.is_complete}
+
+                    if torrent.state_enum.is_errored:
+                        print(colorama.Fore.YELLOW,
+                            f'[!] Deleting {torrent.name}, because its current state is errored',
+                            colorama.Style.RESET_ALL)
+                        client.torrents_delete(delete_files=True, torrent_hashes=[torrent.hash])
+                    else:
+                        for state in torrent_states:
+                            if torrent_states[state]:
+                                print(colorama.Fore.YELLOW,
+                                    f'[!] {torrent.name} is {state}',
+                                    colorama.Style.RESET_ALL)
+                                if state == 'complete':
+                                    print(colorama.Fore.YELLOW,
+                                        f'[!] Deleting saved torrent: {torrent.name}, because its current state is complete',
+                                        colorama.Style.RESET_ALL)
+                                    client.torrents_delete(delete_files=False, torrent_hashes=[torrent.hash])
+                if args.removetorrent:
+                    torrent_data = {}
+                    torrent_data[torrent_index] = {torrent.name : torrent.hash}
+                    if not torrent_data == {}:
+                        print(f'{torrent_index} : {torrent.name}')
+                        
+                        while True:
+                            remove_selection = int(input('\n\nEnter Index/Indices of which to delete: '))
+                            if not remove_selection in torrent_data:
+                                print(colorama.Fore.RED,
+                                    f'[!!] {remove_selection} is not a valid selection',
+                                    colorama.Style.RESET_ALL)
+                            else:
+                                for element in torrent_data[remove_selection]:
+                                    print(colorama.Fore.GREEN,
+                                        f'[!] Deleting {element}', colorama.Style.RESET_ALL) 
+                                    return client.torrents_delete(delete_files=False, torrent_hashes=[torrent_data[remove_selection][element]])
         except SystemError as syserr:
             print(colorama.Fore.RED,
                 f'[!!] Something went wrong! {syserr}', colorama.Style.RESET_ALL)
@@ -181,13 +205,17 @@ if __name__ == '__main__':
                         action='store',
                         help="Searches for the movie. (e.g. --search 'avengers')")
 
-    parser.add_argument('-d', '--downloadtorrents',
+    parser.add_argument('-dlt', '--downloadtorrents',
                         action='store_true',
                         help='Downloads torrent files in the torrents directory')
 
-    parser.add_argument('-c', '--checkstatus',
+    parser.add_argument('-cts', '--checktorrentstatus',
                         action='store_true',
                         help='Checks torrent status on qbittorrent localhost server')
+
+    parser.add_argument('-rmt', '--removetorrent',
+                        action='store_true',
+                        help='Deletes torrents')
 
     args = parser.parse_args()
     if args.search:
@@ -196,5 +224,5 @@ if __name__ == '__main__':
     if args.downloadtorrents:
         Torrents().movies_dl()
 
-    if args.checkstatus:
+    if args.checktorrentstatus or args.removetorrent:
         Torrents().check_torrent_status()
