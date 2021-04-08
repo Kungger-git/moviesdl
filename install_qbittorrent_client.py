@@ -1,8 +1,8 @@
-import requests
 import wget
 import platform
 import colorama
 import os
+import subprocess
 
 
 class Download_qbit():
@@ -28,7 +28,20 @@ class Download_qbit():
                 print(colorama.Fore.GREEN, f'[*] Downloading Qbittorrent for {self.operating_system}',
                       colorama.Style.RESET_ALL)
                 dl_installer = wget.download(mirrors_command[self.operating_system])
+                return Download_qbit(self.operating_system).install()
+
+    def install(self):
+        if self.operating_system == 'Windows':
+            for exec in os.listdir():
+                if exec.endswith('.exe'):
+                    print(colorama.Fore.YELLOW,
+                        f'\n\n[!] Executing {exec}', colorama.Style.RESET_ALL)
+                    p = subprocess.Popen(os.path.join(os.getcwd(), exec), cwd=os.getcwd())
+                    p.wait()
+                    os.remove(exec)
+
 
 
 if __name__ == '__main__':
+    colorama.init()
     Download_qbit(platform.system()).download()
