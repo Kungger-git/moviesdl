@@ -36,10 +36,8 @@ class Download_qbit():
                 if exec.endswith('.exe'):
                     print(colorama.Fore.YELLOW,
                         f'\n\n[!] Executing {exec}', colorama.Style.RESET_ALL)
-                    p = subprocess.Popen(os.path.join(os.getcwd(), exec), cwd=os.getcwd())
-                    p.wait()
+                    subprocess.Popen(os.path.join(os.getcwd(), exec), cwd=os.getcwd()).wait()
                     os.remove(exec)
-
 
 
 if __name__ == '__main__':
