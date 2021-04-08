@@ -123,6 +123,9 @@ class Torrents:
             qbit = qbittorrent.Client('http://127.0.0.1:8080/')
             qbit.login('admin', 'adminadmin')
 
+            if not os.path.exists('movies'):
+                os.mkdir('movies')
+
             os.chdir(os.path.join(origin, 'torrents'))
             if os.listdir() == []:
                 print(colorama.Fore.YELLOW,
@@ -130,7 +133,7 @@ class Torrents:
             else:
                 for torrent in os.listdir():
                     tor_dl = open(torrent, 'rb')
-                    qbit.download_from_file(tor_dl)
+                    qbit.download_from_file(tor_dl, save_path=os.path.join(origin, 'movies'))
                     Torrents().check_torrent_status()
 
                     os.remove(torrent)
