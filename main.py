@@ -217,7 +217,7 @@ class String_Converters:
         while size > power:
             size /= power
             n += 1
-        return f'{round(size, 2)} {power_labels[n]}B'
+        return f'{round(size, 2)} {power_labels[n]}b'
 
 
 if __name__ == '__main__':
