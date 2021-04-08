@@ -170,10 +170,10 @@ class Torrents:
                             f'[!] Seeders: {torrent.num_seeds} Peers: {torrent.num_leechs}',
                             colorama.Style.RESET_ALL)
                         print(colorama.Fore.YELLOW,
-                            '[!] Downloaded: {:,} bytes'.format(torrent.completed),
+                            f'[!] Downloaded: {String_Converters().format_bytes(torrent.downloaded)} / {String_Converters().format_bytes(torrent.total_size)}',
                             colorama.Style.RESET_ALL)
                         print(colorama.Fore.YELLOW,
-                            f'[!] Download Speed: {String_Converters().format_bytes(torrent.dlspeed)}',
+                            f'[!] Download Speed: {String_Converters().format_bytes(torrent.dlspeed)}p/s',
                             colorama.Style.RESET_ALL)
                         print(colorama.Fore.YELLOW,
                             f'[!] ETA: {String_Converters().convert(torrent.eta)}',
@@ -217,7 +217,7 @@ class String_Converters:
         while size > power:
             size /= power
             n += 1
-        return f'{round(size, 2)} {power_labels[n]}bp/s'
+        return f'{round(size, 2)} {power_labels[n]}B'
 
 
 if __name__ == '__main__':
