@@ -167,7 +167,7 @@ class Torrents:
                     
                     elif torrent.state_enum.is_downloading:
                         print(colorama.Fore.YELLOW,
-                            f"[!] {torrent.name} is downloading.. Progress: {'{:.0%}'.format(torrent.progress)}",
+                            f"[!] {torrent.name} is downloading.. Progress: {'{:.2%}'.format(torrent.progress)}",
                             colorama.Style.RESET_ALL)
                         print(colorama.Fore.YELLOW,
                             f'[!] Seeders: {torrent.num_seeds} Peers: {torrent.num_leechs}',
