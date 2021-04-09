@@ -38,6 +38,12 @@ class Download_qbit():
                         f'\n\n[!] Executing {exec}', colorama.Style.RESET_ALL)
                     subprocess.Popen(os.path.join(os.getcwd(), exec), cwd=os.getcwd()).wait()
                     os.remove(exec)
+        else:
+            for image in os.listdir():
+                if image.endswith('.dmg'):
+                    print(colorama.Fore.YELLOW,
+                            f'[!] Mounting {image}', colorama.Style.RESET_ALL)
+                    os.system(f'hdiutil attach -mountpoint ~/Desktop {image}')
 
 
 if __name__ == '__main__':
