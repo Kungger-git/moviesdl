@@ -27,7 +27,7 @@ class Download_qbit():
             else:
                 print(colorama.Fore.GREEN, f'[*] Downloading Qbittorrent for {self.operating_system}',
                       colorama.Style.RESET_ALL)
-                dl_installer = wget.download(mirrors_command[self.operating_system])
+                wget.download(mirrors_command[self.operating_system])
                 return Download_qbit(self.operating_system).install()
 
     def install(self):
