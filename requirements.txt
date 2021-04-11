@@ -3,3 +3,4 @@ colorama>=0.4.4
 requests>=2.25.1
 python-qbittorrent>=0.4.2
 qbittorrent-api>=2021.3.18
+wget>=3.2
