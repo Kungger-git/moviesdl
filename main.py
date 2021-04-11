@@ -117,7 +117,7 @@ class Get_Movies:
 class Torrents:
 
     def movies_dl(self):
-        import qbittorrent
+        import qbittorrent, platform
         origin = os.getcwd()
         try:
             qbit = qbittorrent.Client('http://127.0.0.1:8080/')
@@ -132,8 +132,11 @@ class Torrents:
                     '[!] No Torrents Downloaded', colorama.Style.RESET_ALL)
             else:
                 for torrent in os.listdir():
-                    tor_dl = open(torrent, 'rb')
-                    qbit.download_from_file(tor_dl, save_path=os.path.join(origin, 'movies'))
+                    with open(torrent, 'rb') as tor_dl:
+                        if platform.system() == 'Windows':
+                            qbit.download_from_file(tor_dl)
+                        else:
+                            qbit.download_from_file(tor_dl, save_path=os.path.join(origin, 'movies'))
                     Torrents().check_torrent_status()
 
                     os.remove(torrent)
