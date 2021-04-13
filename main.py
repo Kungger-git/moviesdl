@@ -168,14 +168,15 @@ class Torrents:
                                     'Download Speed': f'{String_Converters().format_bytes(torrent.dlspeed)}p/s', 'ETA': String_Converters().convert(torrent.eta)}
                         for data in data_set:
                             print(colorama.Fore.YELLOW, f'[!] {data}: {data_set[data]}', colorama.Style.RESET_ALL)
-                
+                        print('\n')
+
                 if args.removetorrent:
                     print(f'{torrent_index} : {torrent.name}')
 
             if args.removetorrent:        
                 if not torrent_data == {}:
                     while True:
-                        remove_selection = int(input('\n\nEnter Index/Indices of which to delete: '))
+                        remove_selection = int(input('\n\nEnter Index of which to delete: '))
                         if not remove_selection in torrent_data:
                             print(colorama.Fore.RED,
                                 f'[!!] {remove_selection} is not a valid selection',
