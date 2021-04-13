@@ -33,11 +33,7 @@ class Get_Movies:
         data_set = {}
         for index, movie in enumerate(self.locator.findAll('a', {'class': 'browse-movie-title'}), start=1):
             data_set[index] = {movie.text: movie['href']}
-
-        for index, title_index in enumerate(data_set, start=1):
-            if index == title_index:
-                for title in data_set[title_index]:
-                    print(f'{index} : {title}')
+            print(f'{index} : {movie.text}')
 
         if not data_set == {}:
             while True:
@@ -137,9 +133,9 @@ class Torrents:
                             qbit.download_from_file(tor_dl)
                         else:
                             qbit.download_from_file(tor_dl, save_path=os.path.join(origin, 'movies'))
-                    Torrents().check_torrent_status()
 
                     os.remove(torrent)
+                Torrents().check_torrent_status()
             os.chdir(origin)
         except SystemError as syserr:
             print(colorama.Fore.RED,
@@ -154,7 +150,10 @@ class Torrents:
             print(colorama.Fore.GREEN,
                 f'[*] You have {len(client.torrents_info())} Torrent{String_Converters().plural_s(len(client.torrents_info()))}',
                 colorama.Style.RESET_ALL)
+
+            torrent_data = {}
             for torrent_index, torrent in enumerate(client.torrents_info(), start=1):
+                torrent_data[torrent_index] = {torrent.name : torrent.hash}                
                 if args.downloadtorrents or args.checktorrentstatus:
                     if torrent.state_enum.is_errored:
                         print(colorama.Fore.YELLOW,
@@ -164,7 +163,7 @@ class Torrents:
                     
                     elif torrent.state_enum.is_complete:
                         print(colorama.Fore.YELLOW, f'[!] {torrent.name} complete.', colorama.Style.RESET_ALL)                           
-                        print(colorama.Fore.YELLOW, f'[!] Deleting saved torrent: {torrent.name}, because current state is complete',
+                        print(colorama.Fore.YELLOW, f'[!] Deleting saved torrent: {torrent.name}, because current state is complete\n',
                             colorama.Style.RESET_ALL)
                         client.torrents_delete(delete_files=False, torrent_hashes=[torrent.hash])
                     
@@ -182,25 +181,24 @@ class Torrents:
                             f'[!] Download Speed: {String_Converters().format_bytes(torrent.dlspeed)}p/s',
                             colorama.Style.RESET_ALL)
                         print(colorama.Fore.YELLOW,
-                            f'[!] ETA: {String_Converters().convert(torrent.eta)}',
+                            f'[!] ETA: {String_Converters().convert(torrent.eta)}\n\n',
                             colorama.Style.RESET_ALL)
                 if args.removetorrent:
-                    torrent_data = {}
-                    torrent_data[torrent_index] = {torrent.name : torrent.hash}
-                    if not torrent_data == {}:
-                        print(f'{torrent_index} : {torrent.name}')
-                        
-                        while True:
-                            remove_selection = int(input('\n\nEnter Index/Indices of which to delete: '))
-                            if not remove_selection in torrent_data:
-                                print(colorama.Fore.RED,
-                                    f'[!!] {remove_selection} is not a valid selection',
-                                    colorama.Style.RESET_ALL)
-                            else:
-                                for element in torrent_data[remove_selection]:
-                                    print(colorama.Fore.GREEN,
-                                        f'[!] Deleting {element}', colorama.Style.RESET_ALL) 
-                                    return client.torrents_delete(delete_files=False, torrent_hashes=[torrent_data[remove_selection][element]])
+                    print(f'{torrent_index} : {torrent.name}')
+                
+            if args.removetorrent:        
+                if not torrent_data == {}:
+                    while True:
+                        remove_selection = int(input('\n\nEnter Index/Indices of which to delete: '))
+                        if not remove_selection in torrent_data:
+                            print(colorama.Fore.RED,
+                                f'[!!] {remove_selection} is not a valid selection',
+                                colorama.Style.RESET_ALL)
+                        else:
+                            for element in torrent_data[remove_selection]:
+                                print(colorama.Fore.GREEN,
+                                    f'[!] Deleted {element}', colorama.Style.RESET_ALL) 
+                                return client.torrents_delete(delete_files=True, torrent_hashes=[torrent_data[remove_selection][element]])
         except SystemError as syserr:
             print(colorama.Fore.RED,
                 f'[!!] Something went wrong! {syserr}', colorama.Style.RESET_ALL)
