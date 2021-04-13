@@ -122,21 +122,17 @@ class Torrents:
             if not os.path.exists('movies'):
                 os.mkdir('movies')
 
-            os.chdir(os.path.join(origin, 'torrents'))
-            if os.listdir() == []:
+            if os.listdir(os.path.join(os.getcwd(), 'torrents')) == []:
                 print(colorama.Fore.YELLOW,
                     '[!] No Torrents Downloaded', colorama.Style.RESET_ALL)
             else:
-                for torrent in os.listdir():
-                    with open(torrent, 'rb') as tor_dl:
-                        if platform.system() == 'Windows':
-                            qbit.download_from_file(tor_dl)
-                        else:
+                torrents_dir = os.path.join(os.getcwd(), 'torrents')
+                for filename in os.listdir(torrents_dir):
+                    if filename.endswith('.torrent'):
+                        with open(os.path.join(torrents_dir, filename), 'rb') as tor_dl:
                             qbit.download_from_file(tor_dl, save_path=os.path.join(origin, 'movies'))
-
-                    os.remove(torrent)
+                    os.remove(os.path.join(torrents_dir, filename))
                 Torrents().check_torrent_status()
-            os.chdir(origin)
         except SystemError as syserr:
             print(colorama.Fore.RED,
                 f'[!!] Something went wrong! {syserr}',
@@ -146,7 +142,6 @@ class Torrents:
         import qbittorrentapi
         try:
             client = qbittorrentapi.Client(host='localhost:8080', username='admin', password='adminadmin')
-
             print(colorama.Fore.GREEN,
                 f'[*] You have {len(client.torrents_info())} Torrent{String_Converters().plural_s(len(client.torrents_info()))}',
                 colorama.Style.RESET_ALL)
@@ -168,24 +163,15 @@ class Torrents:
                         client.torrents_delete(delete_files=False, torrent_hashes=[torrent.hash])
                     
                     elif torrent.state_enum.is_downloading:
-                        print(colorama.Fore.YELLOW,
-                            f"[!] {torrent.name} is downloading.. Progress: {'{:.2%}'.format(torrent.progress)}",
-                            colorama.Style.RESET_ALL)
-                        print(colorama.Fore.YELLOW,
-                            f'[!] Seeders: {torrent.num_seeds} Peers: {torrent.num_leechs}',
-                            colorama.Style.RESET_ALL)
-                        print(colorama.Fore.YELLOW,
-                            f'[!] Downloaded: {String_Converters().format_bytes(torrent.downloaded)} / {String_Converters().format_bytes(torrent.total_size)}',
-                            colorama.Style.RESET_ALL)
-                        print(colorama.Fore.YELLOW,
-                            f'[!] Download Speed: {String_Converters().format_bytes(torrent.dlspeed)}p/s',
-                            colorama.Style.RESET_ALL)
-                        print(colorama.Fore.YELLOW,
-                            f'[!] ETA: {String_Converters().convert(torrent.eta)}\n\n',
-                            colorama.Style.RESET_ALL)
+                        data_set = {'Torrent': torrent.name, 'Progress': '{:.2%}'.format(torrent.progress), 'Seeders': torrent.num_seeds, 'Peers': torrent.num_leechs,
+                                    'Downloaded': f'{String_Converters().format_bytes(torrent.downloaded)} / {String_Converters().format_bytes(torrent.total_size)}',
+                                    'Download Speed': f'{String_Converters().format_bytes(torrent.dlspeed)}p/s', 'ETA': String_Converters().convert(torrent.eta)}
+                        for data in data_set:
+                            print(colorama.Fore.YELLOW, f'[!] {data}: {data_set[data]}', colorama.Style.RESET_ALL)
+                
                 if args.removetorrent:
                     print(f'{torrent_index} : {torrent.name}')
-                
+
             if args.removetorrent:        
                 if not torrent_data == {}:
                     while True:
