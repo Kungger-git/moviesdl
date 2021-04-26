@@ -146,7 +146,7 @@ class Torrents:
                     data_torrent = {'Torrent': torrent.name, 'Progress': '{:.1%}'.format(torrent.progress), 'Seeders': torrent.num_seeds, 'Peers': torrent.num_leechs,
                                     'Downloaded': f'{String_Converters().format_bytes(torrent.downloaded)}/{String_Converters().format_bytes(torrent.total_size)}',
                                     'Download Speed': f'{String_Converters().format_bytes(torrent.dlspeed)}/s', 'ETA': String_Converters().convert(torrent.eta)}
-                    print(f"[{data_torrent['Torrent']}]: {data_torrent['Progress']} of {data_torrent['Downloaded']} at {data_torrent['Download Speed']} {data_torrent['ETA']}", end='\r')
+                    print(f"{data_torrent['Torrent']}: {data_torrent['Progress']} of {data_torrent['Downloaded']} at {data_torrent['Download Speed']} {data_torrent['ETA']}", end='\r')
                     if torrent.state_enum.is_complete:
                         temp += 1
         except KeyboardInterrupt:
@@ -215,7 +215,7 @@ class String_Converters:
         while size > power:
             size /= power
             n += 1
-        return f'{round(size, 2)} {power_labels[n]}b'
+        return f'{round(size, 2)}{power_labels[n]}b'
 
 
 if __name__ == '__main__':
