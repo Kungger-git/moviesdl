@@ -17,7 +17,7 @@ class Get_Connection:
             with requests.get(url) as response:
                 response.raise_for_status()
                 page_soup = soup(response.text, 'html.parser')
-            
+
             return Get_Movies(self.query, page_soup).list_movies()
         except requests.HTTPError as err:
             print(colorama.Fore.RED,
@@ -59,7 +59,7 @@ class Get_Movies:
             with requests.get(url) as movie_response:
                 movie_response.raise_for_status()
                 page_soup = soup(movie_response.text, 'html.parser')
-            
+
             quality_data = {}
             for quality in page_soup.findAll('p', {'class': 'hidden-xs hidden-sm'}):
                 for index, download_link in enumerate(quality.findAll('a', {'rel': 'nofollow'}), start=1):
@@ -137,7 +137,21 @@ class Torrents:
             print(colorama.Fore.RED,
                 f'[!!] Something went wrong! {syserr}',
                 colorama.Style.RESET_ALL)
-    
+
+    def dl_status(self, qbit_client):
+        try:
+            temp = 0
+            while temp < 1:
+                for torrent in qbit_client.torrents.info():
+                    data_torrent = {'Torrent': torrent.name, 'Progress': '{:.1%}'.format(torrent.progress), 'Seeders': torrent.num_seeds, 'Peers': torrent.num_leechs,
+                                    'Downloaded': f'{String_Converters().format_bytes(torrent.downloaded)}/{String_Converters().format_bytes(torrent.total_size)}',
+                                    'Download Speed': f'{String_Converters().format_bytes(torrent.dlspeed)}/s', 'ETA': String_Converters().convert(torrent.eta)}
+                    print(f"[{data_torrent['Torrent']}]: {data_torrent['Progress']} of {data_torrent['Downloaded']} at {data_torrent['Download Speed']} {data_torrent['ETA']}", end='\r')
+                    if torrent.state_enum.is_complete:
+                        temp += 1
+        except KeyboardInterrupt:
+            print('\n\nStopped!')
+
     def check_torrent_status(self):
         import qbittorrentapi
         try:
@@ -148,32 +162,25 @@ class Torrents:
 
             torrent_data = {}
             for torrent_index, torrent in enumerate(client.torrents_info(), start=1):
-                torrent_data[torrent_index] = {torrent.name : torrent.hash}                
+                torrent_data[torrent_index] = {torrent.name : torrent.hash}
                 if args.downloadtorrents or args.checktorrentstatus:
+                    Torrents().dl_status(client)
                     if torrent.state_enum.is_errored:
                         print(colorama.Fore.YELLOW,
                             f'[!] Deleting {torrent.name}, because its current state is errored',
                             colorama.Style.RESET_ALL)
                         client.torrents_delete(delete_files=True, torrent_hashes=[torrent.hash])
-                    
+
                     elif torrent.state_enum.is_complete:
-                        print(colorama.Fore.YELLOW, f'[!] {torrent.name} complete.', colorama.Style.RESET_ALL)                           
+                        print(colorama.Fore.YELLOW, f'[!] {torrent.name} complete.', colorama.Style.RESET_ALL)
                         print(colorama.Fore.YELLOW, f'[!] Deleting saved torrent: {torrent.name}, because current state is complete\n',
                             colorama.Style.RESET_ALL)
                         client.torrents_delete(delete_files=False, torrent_hashes=[torrent.hash])
-                    
-                    elif torrent.state_enum.is_downloading:
-                        data_set = {'Torrent': torrent.name, 'Progress': '{:.2%}'.format(torrent.progress), 'Seeders': torrent.num_seeds, 'Peers': torrent.num_leechs,
-                                    'Downloaded': f'{String_Converters().format_bytes(torrent.downloaded)} / {String_Converters().format_bytes(torrent.total_size)}',
-                                    'Download Speed': f'{String_Converters().format_bytes(torrent.dlspeed)}p/s', 'ETA': String_Converters().convert(torrent.eta)}
-                        for data in data_set:
-                            print(colorama.Fore.YELLOW, f'[!] {data}: {data_set[data]}', colorama.Style.RESET_ALL)
-                        print('\n')
 
                 if args.removetorrent:
                     print(f'{torrent_index} : {torrent.name}')
 
-            if args.removetorrent:        
+            if args.removetorrent:
                 if not torrent_data == {}:
                     while True:
                         remove_selection = int(input('\n\nEnter Index of which to delete: '))
@@ -184,7 +191,7 @@ class Torrents:
                         else:
                             for element in torrent_data[remove_selection]:
                                 print(colorama.Fore.GREEN,
-                                    f'[!] Deleted {element}', colorama.Style.RESET_ALL) 
+                                    f'[!] Deleted {element}', colorama.Style.RESET_ALL)
                                 return client.torrents_delete(delete_files=True, torrent_hashes=[torrent_data[remove_selection][element]])
         except SystemError as syserr:
             print(colorama.Fore.RED,
