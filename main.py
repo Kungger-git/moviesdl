@@ -31,9 +31,9 @@ class Get_Movies:
 
     def list_movies(self):
         data_set = {}
-        for index, movie in enumerate(self.locator.findAll('a', {'class': 'browse-movie-title'}), start=1):
-            data_set[index] = {movie.text: movie['href']}
-            print(f'{index} : {movie.text}')
+        for index, movie in enumerate(self.locator.findAll('div', {'class': 'browse-movie-bottom'}), start=1):
+            data_set[index] = {' '.join(movie.text.split()): movie.find('a')['href']}
+            print(f"{index} : {' '.join(movie.text.split())}")
 
         if not data_set == {}:
             while True:
