@@ -139,6 +139,8 @@ class Torrents:
                 colorama.Style.RESET_ALL)
 
     def dl_status(self, qbit_client):
+        import sys
+        import time
         try:
             temp = 0
             while temp < 1:
@@ -146,9 +148,13 @@ class Torrents:
                     data_torrent = {'Torrent': torrent.name, 'Progress': '{:.1%}'.format(torrent.progress), 'Seeders': torrent.num_seeds, 'Peers': torrent.num_leechs,
                                     'Downloaded': f'{String_Converters().format_bytes(torrent.downloaded)}/{String_Converters().format_bytes(torrent.total_size)}',
                                     'Download Speed': f'{String_Converters().format_bytes(torrent.dlspeed)}/s', 'ETA': String_Converters().convert(torrent.eta)}
-                    print(f"{data_torrent['Torrent']}: {data_torrent['Progress']} {data_torrent['Downloaded']} at {data_torrent['Download Speed']} ETA: {data_torrent['ETA']}", end='\r')
+                    sys.stdout.write('\r')
+                    sys.stdout.write(f"{data_torrent['Torrent']}: {data_torrent['Progress']} {data_torrent['Downloaded']} at {data_torrent['Download Speed']} ETA: {data_torrent['ETA']}\r")
+                    sys.stdout.flush()
+                    time.sleep(0.3)
                     if torrent.state_enum.is_complete:
                         temp += 1
+                        Torrents().check_torrent_status()
         except KeyboardInterrupt:
             print('\n\nStopped!')
 
