@@ -1,8 +1,6 @@
-import wget
 import platform
 import colorama
 import os
-import subprocess
 
 
 class Download_qbit():
@@ -11,6 +9,7 @@ class Download_qbit():
         self.operating_system = operating_system
 
     def download(self):
+        import wget
         mirrors_command = {'Windows': 'https://nchc.dl.sourceforge.net/project/qbittorrent/qbittorrent-win32/qbittorrent-4.3.4.1/qbittorrent_4.3.4.1_x64_setup.exe',
                    'Darwin': 'https://udomain.dl.sourceforge.net/project/qbittorrent/qbittorrent-mac/qbittorrent-4.3.4.1/qbittorrent-4.3.4.1.dmg',
                    'Linux': 'sudo apt-get install -y qbittorrent qbittorrent-nox'}
@@ -31,6 +30,7 @@ class Download_qbit():
                 return Download_qbit(self.operating_system).install()
 
     def install(self):
+        import subprocess
         if self.operating_system == 'Windows':
             for exec in os.listdir():
                 if exec.endswith('.exe'):

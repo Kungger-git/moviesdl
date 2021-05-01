@@ -139,7 +139,6 @@ class Torrents:
                 colorama.Style.RESET_ALL)
 
     def dl_status(self, qbit_client):
-        import sys
         import time
         try:
             temp = 0
@@ -148,14 +147,12 @@ class Torrents:
                     data_torrent = {'Torrent': torrent.name, 'Progress': '{:.1%}'.format(torrent.progress), 'Seeders': torrent.num_seeds, 'Peers': torrent.num_leechs,
                                     'Downloaded': f'{String_Converters().format_bytes(torrent.downloaded)}/{String_Converters().format_bytes(torrent.total_size)}',
                                     'Download Speed': f'{String_Converters().format_bytes(torrent.dlspeed)}/s', 'ETA': String_Converters().convert(torrent.eta)}
-                    sys.stdout.write('\r')
-                    sys.stdout.write(f"{data_torrent['Torrent']}: {data_torrent['Progress']} {data_torrent['Downloaded']} at {data_torrent['Download Speed']} ETA: {data_torrent['ETA']}\r")
-                    sys.stdout.flush()
+                    print(f"{data_torrent['Torrent']}: {data_torrent['Progress']} {data_torrent['Downloaded']} at {data_torrent['Download Speed']} ETA: {data_torrent['ETA']}", end='\r')
                     time.sleep(0.3)
                     if torrent.state_enum.is_complete:
                         temp += 1
-                        Torrents().check_torrent_status()
         except KeyboardInterrupt:
+            print(colorama.Fore.YELLOW, "\n[!] Download is still on-going!", colorama.Style.RESET_ALL)
             print('\n\nStopped!')
 
     def check_torrent_status(self):
@@ -178,7 +175,7 @@ class Torrents:
                         client.torrents_delete(delete_files=True, torrent_hashes=[torrent.hash])
 
                     elif torrent.state_enum.is_complete:
-                        print(colorama.Fore.YELLOW, f'[!] {torrent.name} complete.', colorama.Style.RESET_ALL)
+                        print(colorama.Fore.YELLOW, f'\n[!] {torrent.name} complete.', colorama.Style.RESET_ALL)
                         print(colorama.Fore.YELLOW, f'[!] Deleting saved torrent: {torrent.name}, because current state is complete\n',
                             colorama.Style.RESET_ALL)
                         client.torrents_delete(delete_files=False, torrent_hashes=[torrent.hash])
@@ -210,9 +207,8 @@ class String_Converters:
         return 's' if not abs(v) == 1 else ''
 
     def convert(self, seconds):
-        mins, secs = divmod(seconds, 60)
-        hours, mins = divmod(mins, 60)
-        return "%d:%02d:%02d" % (hours, mins, secs)
+        import time
+        return time.strftime("%H:%M:%S", time.gmtime(seconds))
 
     def format_bytes(self, size):
         power = 2**10
