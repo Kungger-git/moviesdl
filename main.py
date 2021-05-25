@@ -230,7 +230,8 @@ class String_Converters:
 
 if __name__ == '__main__':
     colorama.init()
-    parser = argparse.ArgumentParser(description="Download Movies Through the terminal")
+    parser = argparse.ArgumentParser(description="Download Movies For Free From The Terminal",
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument('-s', '--search',
                         nargs=1, metavar='SEARCH',
