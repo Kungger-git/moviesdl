@@ -36,19 +36,22 @@ class Get_Movies:
             print(f"{index} : {' '.join(movie.text.split())}")
 
         if not data_set == {}:
-            while True:
-                selection = int(input('\n\nSelect the index of the movie to download: '))
-                if not selection in data_set:
-                    print(colorama.Fore.RED,
-                        f'[!!] {selection} is not a valid selection',
-                        colorama.Style.RESET_ALL)
-                else:
-                    for title in data_set[selection]:
-                        print(colorama.Fore.YELLOW,
-                            f'[!] {title} has been selected\n\n', colorama.Style.RESET_ALL)
-                        print(colorama.Fore.GREEN,
-                            f'[*] Getting Available Video Qualities for {title}', colorama.Style.RESET_ALL)
-                        return Get_Movies(self.query, self.locator).find_torrent(data_set[selection][title])
+            try:
+                while True:
+                    selection = int(input('\n\nSelect the index of the movie to download: '))
+                    if not selection in data_set:
+                        print(colorama.Fore.RED,
+                            f'[!!] {selection} is not a valid selection',
+                            colorama.Style.RESET_ALL)
+                    else:
+                        for title in data_set[selection]:
+                            print(colorama.Fore.YELLOW,
+                                f'[!] {title} has been selected\n\n', colorama.Style.RESET_ALL)
+                            print(colorama.Fore.GREEN,
+                                f'[*] Getting Available Video Qualities for {title}', colorama.Style.RESET_ALL)
+                            return Get_Movies(self.query, self.locator).find_torrent(data_set[selection][title])
+            except KeyboardInterrupt:
+                print('\nStopped!')
         else:
             print(colorama.Fore.YELLOW,
                 f'[!] There are no results for {self.query}',
@@ -65,22 +68,24 @@ class Get_Movies:
                 for index, download_link in enumerate(quality.findAll('a', {'rel': 'nofollow'}), start=1):
                     quality_data[index] = {download_link.text: download_link['href']}
                     print(f'{index} : {download_link.text}')
-
-            while True:
-                select_quality = int(input('\n\nSelect Index of Desired Quality: '))
-                if not select_quality in quality_data:
-                    print(colorama.Fore.RED,
-                        f'[!!] {select_quality} is not a valid quality selection',
-                        colorama.Style.RESET_ALL)
-                else:
-                    for torrent in quality_data[select_quality]:
-                        for selected in quality_data[select_quality].keys():
-                            print(colorama.Fore.YELLOW,
-                                f'[!] {selected} quality has been selected\n\n',
-                                colorama.Style.RESET_ALL)
-                        print(colorama.Fore.GREEN,
-                            f'[*] Downloading Torrent File')
-                        return Get_Movies(self.query, self.locator).dl_torrent(quality_data[select_quality][torrent])
+            try:
+                while True:
+                    select_quality = int(input('\n\nSelect Index of Desired Quality: '))
+                    if not select_quality in quality_data:
+                        print(colorama.Fore.RED,
+                            f'[!!] {select_quality} is not a valid quality selection',
+                            colorama.Style.RESET_ALL)
+                    else:
+                        for torrent in quality_data[select_quality]:
+                            for selected in quality_data[select_quality].keys():
+                                print(colorama.Fore.YELLOW,
+                                    f'[!] {selected} quality has been selected\n\n',
+                                    colorama.Style.RESET_ALL)
+                            print(colorama.Fore.GREEN,
+                                f'[*] Downloading Torrent File')
+                            return Get_Movies(self.query, self.locator).dl_torrent(quality_data[select_quality][torrent])
+            except KeyboardInterrupt:
+                print('\nStopped!')
         except requests.HTTPError as err:
             print(colorama.Fore.RED,
                 f'[!!] Something went wrong! {err}', colorama.Style.RESET_ALL)
@@ -185,17 +190,20 @@ class Torrents:
 
             if args.removetorrent:
                 if not torrent_data == {}:
-                    while True:
-                        remove_selection = int(input('\n\nEnter Index of which to delete: '))
-                        if not remove_selection in torrent_data:
-                            print(colorama.Fore.RED,
-                                f'[!!] {remove_selection} is not a valid selection',
-                                colorama.Style.RESET_ALL)
-                        else:
-                            for element in torrent_data[remove_selection]:
-                                print(colorama.Fore.GREEN,
-                                    f'[!] Deleted {element}', colorama.Style.RESET_ALL)
-                                return client.torrents_delete(delete_files=True, torrent_hashes=[torrent_data[remove_selection][element]])
+                    try:
+                        while True:
+                            remove_selection = int(input('\n\nEnter Index of which to delete: '))
+                            if not remove_selection in torrent_data:
+                                print(colorama.Fore.RED,
+                                    f'[!!] {remove_selection} is not a valid selection',
+                                    colorama.Style.RESET_ALL)
+                            else:
+                                for element in torrent_data[remove_selection]:
+                                    print(colorama.Fore.GREEN,
+                                        f'[!] Deleted {element}', colorama.Style.RESET_ALL)
+                                    return client.torrents_delete(delete_files=True, torrent_hashes=[torrent_data[remove_selection][element]])
+                    except KeyboardInterrupt:
+                        print('\nStopped!')
         except SystemError as syserr:
             print(colorama.Fore.RED,
                 f'[!!] Something went wrong! {syserr}', colorama.Style.RESET_ALL)
