@@ -1,6 +1,7 @@
 import platform
 import colorama
 import os
+import distro
 
 
 class Download_qbit():
@@ -8,11 +9,17 @@ class Download_qbit():
     def __init__(self, operating_system):
         self.operating_system = operating_system
 
+    def linux_base_distro(self):
+        if distro.like() == "arch":
+            return 'sudo pacman -S qbittorrent qbittorrent-nox'
+        elif distro.like() == 'debian':
+            return 'sudo apt install -y qbittorrent qbittorrent-nox'
+
     def download(self):
         import wget
         mirrors_command = {'Windows': 'https://nchc.dl.sourceforge.net/project/qbittorrent/qbittorrent-win32/qbittorrent-4.3.4.1/qbittorrent_4.3.4.1_x64_setup.exe',
                    'Darwin': 'https://udomain.dl.sourceforge.net/project/qbittorrent/qbittorrent-mac/qbittorrent-4.3.4.1/qbittorrent-4.3.4.1.dmg',
-                   'Linux': 'sudo apt-get install -y qbittorrent qbittorrent-nox'}
+                   'Linux': Download_qbit(self.operating_system).linux_base_distro()}
 
         if not self.operating_system in mirrors_command:
             print(colorama.Fore.RED,
