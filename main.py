@@ -149,9 +149,13 @@ class Torrents:
             temp = 0
             while temp < 1:
                 for torrent in qbit_client.torrents.info():
-                    data_torrent = {'Torrent': torrent.name, 'Progress': '{:.1%}'.format(torrent.progress), 'Seeders': torrent.num_seeds, 'Peers': torrent.num_leechs,
+                    data_torrent = {'Torrent': torrent.name,
+                                    'Progress': '{:.1%}'.format(torrent.progress),
+                                    'Seeders': torrent.num_seeds,
+                                    'Peers': torrent.num_leechs,
                                     'Downloaded': f'{String_Converters().format_bytes(torrent.downloaded)}/{String_Converters().format_bytes(torrent.total_size)}',
-                                    'Download Speed': f'{String_Converters().format_bytes(torrent.dlspeed)}/s', 'ETA': String_Converters().convert(torrent.eta)}
+                                    'Download Speed': f'{String_Converters().format_bytes(torrent.dlspeed)}/s',
+                                    'ETA': String_Converters().convert(torrent.eta)}
                     print(f"{data_torrent['Torrent']}: {data_torrent['Progress']} {data_torrent['Downloaded']} at {data_torrent['Download Speed']} ETA: {data_torrent['ETA']}", end='\r')
                     time.sleep(0.3)
                     if torrent.state_enum.is_complete:
