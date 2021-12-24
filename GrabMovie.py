@@ -1,5 +1,3 @@
-#!/bin/env python
-
 ## imports
 from modules.error_handling import ErrorFunctions as ef
 from bs4 import BeautifulSoup
