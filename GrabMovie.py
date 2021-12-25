@@ -8,6 +8,7 @@ import time
 import re
 import os
 
+
 class MakeSoup():
 
     # errors that occur when trying to make a request
