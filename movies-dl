@@ -3,6 +3,7 @@
 # imports
 from modules import colors as c
 from modules.clear import clear
+from modules.getch import getch
 from modules.convert_string import StringConverter as sc
 from modules.error_handling import ErrorFunctions as ef
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
@@ -43,7 +44,8 @@ class MoviesDl():
             retry_flag = True
 
             while retry_flag == True:
-                selection = int(input("\n{}Enter Choice:{} ".format(c.RED, c.RESET)))
+                print("\n{}Enter Choice: {}".format(c.RED, c.RESET), end='')
+                selection = int(getch())
 
                 if not selection in res:
                     print("\n{}Invalid Range.{}\n".format(c.RED, c.RESET))
@@ -56,6 +58,7 @@ class MoviesDl():
                         return {'title': title, 'movie_page_url': res[selection][title]}
         except KeyboardInterrupt:
             print('\nStopped!')
+            exit(0)
 
     
     def selectQuality(self, movie):
@@ -90,7 +93,8 @@ class MoviesDl():
             retry_flag = True
 
             while retry_flag == True:
-                selection = int(input("\n{}Enter Choice:{} ".format(c.RED, c.RESET)))
+                print("\n{}Enter Choice: {}".format(c.RED, c.RESET), end='')
+                selection = int(getch())
 
                 if not selection in res:
                     print("\n{}Invalid Range.{}\n".format(c.RED, c.RESET))
@@ -103,6 +107,7 @@ class MoviesDl():
                         return {'quality': quality, 'torrent_url': res[selection][quality]}
         except KeyboardInterrupt:
             print('\nStopped!')
+            exit(0)
 
 
     def getTorrent(self, torrent_info):
