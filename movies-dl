@@ -1,61 +1,136 @@
 #!/bin/env python
 
 # imports
-from modules import colors, convert_string
+from modules import colors as c
+from modules.clear import clear
+from modules.convert_string import StringConverter as sc
 from modules.error_handling import ErrorFunctions as ef
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from GrabMovie import MakeSoup, FindMovie
+from time import sleep
+
+class MoviesDl():
+
+    def __init__(self, search_query):
+        self.search_query = search_query
+
+
+    def selectMovie(self):
+        clear()
+
+        result_movie = MakeSoup(self.search_query).searchResultsPageSoup()
+        fm = FindMovie()
+
+        if result_movie['success'] != True:
+            print(result_movie['error_msg'])
+            exit(0)
+        elif result_movie['success'] == True:
+            movie_results = fm.listMovieResults(result_movie['data'])
+
+        if not 'data' in movie_results:
+            print(movie_results['return_msg'])
+            exit(0)
+        elif 'data' in movie_results:
+            res = movie_results['data']
+            for movie in res:
+                print("[{}{}{}] {}-->{} {}{}{}".format(
+                      c.GREEN, movie, c.RESET,
+                      c.RED, c.RESET,
+                      c.BLUE, ''.join(res[movie]), c.RESET))
+
+        movie_selected = {}
+        try:
+            retry_flag = True
+
+            while retry_flag == True:
+                selection = int(input("\n{}Enter Choice:{} ".format(c.RED, c.RESET)))
+
+                if not selection in res:
+                    print("\n{}Invalid Range.{}\n".format(c.RED, c.RESET))
+                    exit(0)
+                elif selection in res:
+                    for title in res[selection]:
+                        clear()
+
+                        retry_flag = False
+                        return {'title': title, 'movie_page_url': res[selection][title]}
+        except KeyboardInterrupt:
+            print('\nStopped!')
+
+    
+    def selectQuality(self, movie):
+        clear()
+
+        print("{}\"{}\"{} has been selected.\n".format(
+              c.GREEN, movie['title'], c.RESET))
+
+        fmt_mpage_query = movie['movie_page_url'].split('/')[-1]
+        result_quality = MakeSoup(fmt_mpage_query).movieQualityPageSoup()
+        fm = FindMovie()
+
+        if result_quality['success'] != True:
+            print(result_quality['error_msg'])
+            exit(0)
+        elif result_quality['success'] == True:
+            quality_results = fm.listVideoQualities(result_quality['data'])
+            
+        if not 'data' in quality_results:
+            print(quality_results['return_msg'])
+            exit(0)
+        elif 'data' in quality_results:
+            res = quality_results['data']
+            for quality in res:
+                print("[{}{}{}] {}-->{} {}{}{}".format(
+                      c.GREEN, quality, c.RESET,
+                      c.RED, c.RESET,
+                      c.BLUE, ''.join(res[quality]), c.RESET))
+        
+        quality_selected = {}
+        try:
+            retry_flag = True
+
+            while retry_flag == True:
+                selection = int(input("\n{}Enter Choice:{} ".format(c.RED, c.RESET)))
+
+                if not selection in res:
+                    print("\n{}Invalid Range.{}\n".format(c.RED, c.RESET))
+                    exit(0)
+                elif selection in res:
+                    for quality in res[selection]:
+                        clear()
+
+                        retry_flag = False
+                        return {'quality': quality, 'torrent_url': res[selection][quality]}
+        except KeyboardInterrupt:
+            print('\nStopped!')
+
+
+    def getTorrent(self, torrent_info):
+        clear()
+
+        fm = FindMovie()
+        print("{}\"{}\"{} has been selected.\n".format(
+              c.GREEN, torrent_info['quality'], c.RESET))
+        
+        torrent_download = fm.downloadMovieTorrent(torrent_info['torrent_url'])
+        if torrent_download['success'] != True:
+            print(torrent_download['return_msg'])
+            exit(0)
+        elif torrent_download['success'] == True:
+            clear()
+            
+            torrent_path = torrent_download['data']
+            print("{}Download successful.{}\n".format(c.GREEN, c.RESET))
+            print("{}File Location:{} {}\"{}\"{}".format(
+                  c.RED, c.RESET, c.GREEN, torrent_path, c.RESET))
 
 
 def main(query):
-    soup = MakeSoup(query).searchResultsPageSoup()['data']
-    fm = FindMovie()
+    md = MoviesDl(query)
 
-    res = fm.listMovieResults(soup)['data']
-    for movie in res:
-        print("{} : {}".format(movie, ''.join(res[movie])))
-
-    movie_selected = {}
-    try:
-        retry_flag = True
-
-        while retry_flag:
-            selection = int(input('\n\nSelect the index of the movie to download: '))
-            
-            if selection in res:
-                for title in res[selection]:
-                    print('{} has been selected.'.format(title))
-                    movie_selected = {'title': title, 'movie_page_url': res[selection][title]}
-                    
-                    retry_flag = False
-    except KeyboardInterrupt:
-        print('\nStopped!')
-
-    fmt_mpage_query = movie_selected['movie_page_url'].split('/')[-1]
-    mpage = MakeSoup(fmt_mpage_query).movieQualityPageSoup()['data']
-
-    qualities = fm.listVideoQualities(mpage)['data']
-    for quality in qualities:
-        print("{} : {}".format(quality, ''.join(qualities[quality])))
-
-    quality_selected = {}
-    try:
-        retry_flag = True
-
-        while retry_flag:
-            selection = int(input('\n\nSelect the quality of the movie: '))
-            
-            if selection in qualities:
-                for element in qualities[selection]:
-                    print('{} has been selected.'.format(element))
-                    quality_selected = {'quality': element, 'torrent_url': qualities[selection][element]}
-
-                    retry_flag = False
-    except KeyboardInterrupt:
-        print('\nStopped!')
-
-    fm.downloadMovieTorrent(quality_selected['torrent_url'])
-
+    movie = md.selectMovie()
+    quality = md.selectQuality(movie)
+    torrent = md.getTorrent(quality)
 
 
 if __name__ == '__main__':
@@ -81,4 +156,4 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     if args.search:
-        main(' '.join(args.search)) 
+        main(''.join(args.search)) 
