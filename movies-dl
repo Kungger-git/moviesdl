@@ -10,6 +10,7 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from GrabMovie import MakeSoup, FindMovie
 from time import sleep
 
+
 class MoviesDl():
 
     def __init__(self, search_query):
@@ -127,7 +128,8 @@ class MoviesDl():
             torrent_path = torrent_download['data']
             print("{}Download successful.{}\n".format(c.GREEN, c.RESET))
             print("{}File Location:{} {}\"{}\"{}".format(
-                  c.RED, c.RESET, c.GREEN, torrent_path, c.RESET))
+                  c.RED, c.RESET,
+                  c.GREEN, torrent_path, c.RESET))
 
 
 def main(query):
