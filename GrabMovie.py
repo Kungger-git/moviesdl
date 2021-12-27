@@ -122,7 +122,7 @@ class FindMovie():
 
 
     def listVideoQualities(self, movie_page_soup):
-        return_msg = "FindMovie:listVideoQualities"
+        return_msg = "FindMovie:listVideoQualities; "
         debug_data = []
 
         quality_data = {}
@@ -142,12 +142,13 @@ class FindMovie():
         return_msg = "FindMovie:downloadMovieTorrent; "
         debug_data = []
 
-        dir_name = 'torrents'
-        if not os.path.exists(dir_name):
-            os.mkdir(dir_name)
-        
         try:
-            origin = os.getcwd()
+            origin_dir = os.getcwd()
+            dest_dir = os.path.expanduser("~/Downloads/torrents")
+            
+            if not os.path.exists(dest_dir):
+                os.mkdir(dest_dir)
+
             with requests.get(torrent_url) as torrent_response:
                 torrent_response.raise_for_status()
 
@@ -155,11 +156,19 @@ class FindMovie():
             torrent_file = re.findall('filename="(.+)"', disposition)
 
             if torrent_file:
-                os.chdir(os.path.join(origin, dir_name))
+                os.chdir(dest_dir)
                 with open(torrent_file[0], 'wb') as f_torrent:
                     f_torrent.write(torrent_response.content)
 
-                os.chdir(origin)
+                os.chdir(origin_dir)
         except Exception as e:
             return_msg += ef.parseException('downloading torrent file', traceback.format_exc(), torrent_url)
             return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
+
+        torrent = ''.join(torrent_file)
+        if not os.path.exists(os.path.join(dest_dir, torrent)):
+            return_msg += "cannot confirm file location."
+            return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
+        else:
+            torrent_path = os.path.join(dest_dir, torrent)
+            return {'success': True, 'return_msg': return_msg, 'debug_data': debug_data, 'data': torrent_path}
