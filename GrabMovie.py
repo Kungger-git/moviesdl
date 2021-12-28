@@ -202,8 +202,8 @@ class Torrent:
 
         return {'success': True, 'return_msg': return_msg, 'debug_data': debug_data, 'data': qbit}
 
-    def downloadTorrent(self, qbit_client_auth, torrent_path):
-        return_msg = "Torrent:downloadTorrent; "
+    def downloadMovie(self, qbit_client_auth, torrent_path):
+        return_msg = "Torrent:downloadMovie; "
         debug_data = []
  
         dl_dir = os.path.expanduser('~/Downloads')
@@ -218,7 +218,7 @@ class Torrent:
         
         try:
             with open(torrent_path, 'rb') as tor:
-                auth.download_from_file(tor, save_path=dest_dir)
+                qbit_client_auth.download_from_file(tor, save_path=dest_dir)
         except Exception as e:
             return_msg += ef.parseException("downloading movie from torrent file.", e, torrent_path)
             return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
@@ -251,14 +251,16 @@ class Torrent:
             torrent_data = {}
             for torrent in api_auth.torrents.info():
                 torrent_data = {
-                    'Movie Title': torrent.name,
-                    'Progress': '{:.1%}'.format(torrent.progress),
-                    'Seeders': torrent.num_seeds,
-                    'Peers': torrent.num_leechs,
-                    'Downloaded': "{}/{}".format(sc.formatBytes(torrent.downloaded), sc.formatBytes(torrent.total_size)),
-                    'Download Speed': "{}/s".format(sc.formatBytes(torrent.dlspeed)),
-                    'ETA': sc.convertTime(torrent.eta)
+                    'torrent_name': torrent.name,
+                    'progress': '{:.1%}'.format(torrent.progress),
+                    'seeders': torrent.num_seeds,
+                    'peers': torrent.num_leechs,
+                    'downloaded': "{}/{}".format(sc.formatBytes(torrent.downloaded), sc.formatBytes(torrent.total_size)),
+                    'download_speed': "{}/s".format(sc.formatBytes(torrent.dlspeed)),
+                    'eta': sc.convertTime(torrent.eta)
                 }
+                if torrent.state_enum.is_complete:
+                    return {'success': True, 'return_msg': return_msg, 'debug_data': debug_data, 'data': 1}
         except Exception as e:
             return_msg += ef.parseException('retrieving movie download info', e, api_auth)
             return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
