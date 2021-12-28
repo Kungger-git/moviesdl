@@ -217,7 +217,6 @@ class Torrent:
             return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
         
         try:
-            auth = qbit_client_auth['data']
             with open(torrent_path, 'rb') as tor:
                 auth.download_from_file(tor, save_path=dest_dir)
         except Exception as e:
@@ -226,11 +225,11 @@ class Torrent:
 
         return {'success': True, 'return_msg': return_msg, 'debug_data': debug_data}
 
-   
-    def statusCheck(self):
-        return_msg = "Torrent:statusCheck; "
+  
+    def authorizeAPIAccess(self):
+        return_msg = "Torrent:authorizeAPIAccess; "
         debug_data = []
-        
+
         try:
             api_client = qbittorrentapi.Client(
                     host=self.host,
@@ -241,15 +240,27 @@ class Torrent:
             return_msg += ef.parseException('Connection to Local qbit Server Failed', e, "")
             return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
 
-        torrent_data = {}
-        for torrent in api_client.torrents.info():
-            torrent_data = {
-                'Movie Title': torrent.name,
-                'Progress': '{:.1%}'.format(torrent.progress),
-                'Seeders': torrent.num_seeds,
-                'Peers': torrent.num_leechs,
-                'Downloaded': "{}/{}".format(sc.formatBytes(torrent.downloaded), sc.formatBytes(torrent.total_size)),
-                'Download Speed': "{}/s".format(sc.formatBytes(torrent.dlspeed)),
-                'ETA': sc.convertTime(torrent.eta)
-            }
+        return {'success': True, 'return_msg': return_msg, 'debug_data': debug_data, 'data': api_client}
+
+
+    def statusCheck(self, api_auth):
+        return_msg = "Torrent:statusCheck; "
+        debug_data = []
+
+        try:
+            torrent_data = {}
+            for torrent in api_auth.torrents.info():
+                torrent_data = {
+                    'Movie Title': torrent.name,
+                    'Progress': '{:.1%}'.format(torrent.progress),
+                    'Seeders': torrent.num_seeds,
+                    'Peers': torrent.num_leechs,
+                    'Downloaded': "{}/{}".format(sc.formatBytes(torrent.downloaded), sc.formatBytes(torrent.total_size)),
+                    'Download Speed': "{}/s".format(sc.formatBytes(torrent.dlspeed)),
+                    'ETA': sc.convertTime(torrent.eta)
+                }
+        except Exception as e:
+            return_msg += ef.parseException('retrieving movie download info', e, api_auth)
+            return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
+
         return {'success': True, 'return_msg': return_msg, 'debug_data': debug_data, 'data': torrent_data}
