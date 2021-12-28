@@ -209,16 +209,13 @@ class Torrent:
         dl_dir = os.path.expanduser('~/Downloads')
         dest_dir = os.path.join(dl_dir, 'movies')
        
-        try:
-            if not os.path.exists(dest_dir):
-                os.mkdir(dest_dir)
-        except Exception as e:
-            return_msg += ef.parseException('creating movies on Downloads directory', e, dest_dir)
-            return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
+        if not os.path.exists(dest_dir):
+            os.mkdir(dest_dir)
         
         try:
             with open(torrent_path, 'rb') as tor:
                 qbit_client_auth.download_from_file(tor, save_path=dest_dir)
+            os.remove(torrent_path)
         except Exception as e:
             return_msg += ef.parseException("downloading movie from torrent file.", e, torrent_path)
             return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
@@ -249,7 +246,7 @@ class Torrent:
 
         try:
             torrent_data = {}
-            for torrent in api_auth.torrents.info():
+            for torrent in api_auth.torrents_info():
                 torrent_data = {
                     'torrent_name': torrent.name,
                     'progress': '{:.1%}'.format(torrent.progress),
@@ -261,8 +258,50 @@ class Torrent:
                 }
                 if torrent.state_enum.is_complete:
                     return {'success': True, 'return_msg': return_msg, 'debug_data': debug_data, 'data': 1}
+                elif torrent.state_enum.is_errored:
+                    return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data, 'data': 2}
         except Exception as e:
             return_msg += ef.parseException('retrieving movie download info', e, api_auth)
             return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
 
         return {'success': True, 'return_msg': return_msg, 'debug_data': debug_data, 'data': torrent_data}
+
+
+    def cleanUp(self, api_auth):
+        return_msg = "Torrent:cleanUp; "
+        debug_data = []
+
+        try:
+            for torrent in api_auth.torrents_info():
+                if torrent.state_enum.is_errored:
+                    api_auth.torrents_delete(
+                        delete_files=True,
+                        torrent_hashes=[torrent.hash]
+                    )
+                elif torrent.state_enum.is_complete:
+                    api_auth.torrents_delete(
+                        delete_files=False,
+                        torrent_hashes=[torrent.hash]
+                    )
+        except Exception as e:
+            return_msg += ef.parseException('clean up clutter in Qbittorrent', e, api_auth)
+            return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
+
+        return {'success': True, 'return_msg': return_msg, 'debug_data': debug_data}
+
+
+    def deleteTorrents(self, api_auth):
+        return_msg = "Torrent:deleteTorrents; "
+        debug_data = []
+
+        try:
+            for torrent in api_auth.torrents_info():
+                api_auth.torrents_delete(
+                    delete_files=True,
+                    torrent_hashes=[torrent.hash]
+                )
+        except Exception as e:
+            return_msg += parseException('delete all torrents', e, api_auth)
+            return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
+        
+        return {'success': True, 'return_msg': return_msg, 'debug_data': debug_data}
