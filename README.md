@@ -3,11 +3,6 @@
 <img src="img/movies-dl.gif" />
 </p>
 
-# End Result:
-<p align="center">
-<img src="img/result.png" />
-</p>
-
 
 ### Requirements:
 - `requests`
