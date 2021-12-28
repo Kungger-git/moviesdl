@@ -1,5 +1,6 @@
 ## imports
 from modules.error_handling import ErrorFunctions as ef
+from modules.convert_string import StringConverter as sc
 from bs4 import BeautifulSoup
 import config as cfg
 import traceback
@@ -8,6 +9,9 @@ import time
 import re
 import os
 
+# qbittorrent libs
+import qbittorrent
+import qbittorrentapi
 
 class MakeSoup():
 
@@ -172,3 +176,80 @@ class FindMovie():
         else:
             torrent_path = os.path.join(dest_dir, torrent)
             return {'success': True, 'return_msg': return_msg, 'debug_data': debug_data, 'data': torrent_path}
+
+class Torrent:
+
+    def __init__(self, username=cfg.username, password=cfg.password):
+        self.client = cfg.client
+        self.username = username
+        self.password = password
+        self.host = "{}:{}".format(cfg.host, cfg.port)
+
+
+    def loginQbitClient(self):
+        return_msg = "Torrent:loginQbitClient; "
+        debug_data = []
+
+        try:
+            qbit = qbittorrent.Client(self.client)
+            qbit.login(self.username, self.password)
+        except Exception as e:
+            return_msg += ef.parseException(
+                    'logging into qbittorrent server client.', e, 
+                    [self.username, self.password]
+                )
+            return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
+
+        return {'success': True, 'return_msg': return_msg, 'debug_data': debug_data, 'data': qbit}
+
+    def downloadTorrent(self, qbit_client_auth, torrent_path):
+        return_msg = "Torrent:downloadTorrent; "
+        debug_data = []
+ 
+        dl_dir = os.path.expanduser('~/Downloads')
+        dest_dir = os.path.join(dl_dir, 'movies')
+       
+        try:
+            if not os.path.exists(dest_dir):
+                os.mkdir(dest_dir)
+        except Exception as e:
+            return_msg += ef.parseException('creating movies on Downloads directory', e, dest_dir)
+            return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
+        
+        try:
+            auth = qbit_client_auth['data']
+            with open(torrent_path, 'rb') as tor:
+                auth.download_from_file(tor, save_path=dest_dir)
+        except Exception as e:
+            return_msg += ef.parseException("downloading movie from torrent file.", e, torrent_path)
+            return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
+
+        return {'success': True, 'return_msg': return_msg, 'debug_data': debug_data}
+
+   
+    def statusCheck(self):
+        return_msg = "Torrent:statusCheck; "
+        debug_data = []
+        
+        try:
+            api_client = qbittorrentapi.Client(
+                    host=self.host,
+                    username=self.username,
+                    password=self.password
+                )
+        except Exception as e:
+            return_msg += ef.parseException('Connection to Local qbit Server Failed', e, "")
+            return {'success': False, 'return_msg': return_msg, 'debug_data': debug_data}
+
+        torrent_data = {}
+        for torrent in api_client.torrents.info():
+            torrent_data = {
+                'Movie Title': torrent.name,
+                'Progress': '{:.1%}'.format(torrent.progress),
+                'Seeders': torrent.num_seeds,
+                'Peers': torrent.num_leechs,
+                'Downloaded': "{}/{}".format(sc.formatBytes(torrent.downloaded), sc.formatBytes(torrent.total_size)),
+                'Download Speed': "{}/s".format(sc.formatBytes(torrent.dlspeed)),
+                'ETA': sc.convertTime(torrent.eta)
+            }
+        return {'success': True, 'return_msg': return_msg, 'debug_data': debug_data, 'data': torrent_data}
