@@ -2,7 +2,7 @@
 
 # This is used for establishing connection
 # with the qbittorrent client.
-host = "127.0.0.1"
+host = "localhost"
 port = "8080"
 client = "http://{}:{}/".format(host, port)
 
