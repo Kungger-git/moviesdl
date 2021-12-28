@@ -1,6 +1,7 @@
 #!/bin/env python
 
 # imports
+from modules import nox
 from modules import colors as c
 from modules.run_once import run_once
 from modules.clear import clear
@@ -192,7 +193,6 @@ class MoviesDl():
         except KeyboardInterrupt:
             print('\nStopped!')
             trnt.deleteTorrents(api_auth)
-            exit(0)
 
 
 @run_once
@@ -217,14 +217,15 @@ def errorMessage(name):
 
 
 def main(query):
+    nox.startQbittorrent()
     md = MoviesDl(query)
 
     movie = md.selectMovie()
     quality = md.selectQuality(movie)
     torrent = md.getTorrent(quality)
 
-    md.downloadMovies() 
-    
+    md.downloadMovies()
+    nox.killQbittorrent()
 
 if __name__ == '__main__':
     parser = ArgumentParser(description="Download Movies For Free From The Terminal",
