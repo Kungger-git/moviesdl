@@ -2,13 +2,15 @@
 
 # imports
 from modules import colors as c
+from modules.run_once import run_once
 from modules.clear import clear
 from modules.getch import getch
 from modules.convert_string import StringConverter as sc
 from modules.error_handling import ErrorFunctions as ef
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
-from GrabMovie import MakeSoup, FindMovie
+from GrabMovie import MakeSoup, FindMovie, Torrent
 from time import sleep
+import os
 
 
 class MoviesDl():
@@ -131,6 +133,67 @@ class MoviesDl():
                   c.RED, c.RESET,
                   c.GREEN, torrent_path, c.RESET))
 
+   
+    def downloadMovies(self):
+        clear()
+
+        trnt = Torrent()
+        dl_dir = os.path.expanduser("~/Downloads")
+        src_dir = os.path.join(dl_dir, "torrents")
+        
+        auth = trnt.loginQbitClient()
+        if not 'data' in auth:
+            print(auth['return_msg'])
+            exit(0)
+        elif 'data' in auth:
+            auth = auth['data']
+            
+        for torrent_file in os.listdir(src_dir):
+            if torrent_file.endswith('.torrent'):
+                path = os.path.join(src_dir, torrent_file)
+                trnt.downloadMovie(auth, path)
+        
+        api_auth = trnt.authorizeAPIAccess()
+        if not 'data' in api_auth:
+            print(api_auth['return_msg'])
+            exit(0)
+        elif 'data' in api_auth:
+            api_auth = api_auth['data']
+
+        try:
+            tmp = 0
+            while tmp < 1:
+                status = trnt.statusCheck(api_auth)
+                if not 'data' in status:
+                    print(status['return_msg'])
+                    exit(0)
+                elif 'data' in status:
+                    status = status['data']
+                
+                if status == 1:
+                    tmp += status
+                    break
+
+                titleTorrent(status['torrent_name'])
+                print("{}[Progress]{}: {}{}{} at {}{}{} on {}{}{} in {}{}{}".format(
+                    c.MAGENTA, c.RESET,
+                    c.GREEN, status['progress'], c.RESET,
+                    c.YELLOW, status['downloaded'],c.RESET,
+                    c.RED, status['download_speed'], c.RESET,
+                    c.BLUE, status['eta'], c.RESET),
+                    end='\r')
+                sleep(0.25)
+        except KeyboardInterrupt:
+            print('\nStopped!')
+            exit(0)
+
+
+@run_once
+def titleTorrent(name):
+    print("{}Downloading: {}{}{}".format(
+            c.RED,
+            c.BLUE, name, c.RESET))
+
 
 def main(query):
     md = MoviesDl(query)
@@ -139,6 +202,8 @@ def main(query):
     quality = md.selectQuality(movie)
     torrent = md.getTorrent(quality)
 
+    md.downloadMovies() 
+    
 
 if __name__ == '__main__':
     parser = ArgumentParser(description="Download Movies For Free From The Terminal",
