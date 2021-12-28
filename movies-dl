@@ -128,10 +128,6 @@ class MoviesDl():
             clear()
             
             torrent_path = torrent_download['data']
-            print("{}Download successful.{}\n".format(c.GREEN, c.RESET))
-            print("{}File Location:{} {}\"{}\"{}".format(
-                  c.RED, c.RESET,
-                  c.GREEN, torrent_path, c.RESET))
 
    
     def downloadMovies(self):
@@ -162,6 +158,7 @@ class MoviesDl():
 
         try:
             tmp = 0
+            torrent_name = ""
             while tmp < 1:
                 status = trnt.statusCheck(api_auth)
                 if not 'data' in status:
@@ -172,9 +169,18 @@ class MoviesDl():
                 
                 if status == 1:
                     tmp += status
+                    successMessage(torrent_name)
+                    trnt.cleanUp(api_auth)
                     break
 
-                titleTorrent(status['torrent_name'])
+                if status == 2:
+                    tmp += status
+                    errorMessage(torrent_name)
+                    trnt.cleanUp(api_auth)
+                    break
+
+                torrent_name = status['torrent_name']
+                titleTorrent(torrent_name)
                 print("{}[Progress]{}: {}{}{} at {}{}{} on {}{}{} in {}{}{}".format(
                     c.MAGENTA, c.RESET,
                     c.GREEN, status['progress'], c.RESET,
@@ -185,6 +191,7 @@ class MoviesDl():
                 sleep(0.25)
         except KeyboardInterrupt:
             print('\nStopped!')
+            trnt.deleteTorrents(api_auth)
             exit(0)
 
 
@@ -193,6 +200,20 @@ def titleTorrent(name):
     print("{}Downloading: {}{}{}".format(
             c.RED,
             c.BLUE, name, c.RESET))
+
+
+def successMessage(name):
+    clear()
+    print("{}Download Successful: {}{}".format(
+        c.RED,
+        c.BLUE, name, c.RESET))
+
+
+def errorMessage(name):
+    clear()
+    print("{}Download Unsuccessful: {}{}".format(
+        c.RED,
+        c.BLUE, name, c.RESET))
 
 
 def main(query):
@@ -213,18 +234,6 @@ if __name__ == '__main__':
                         nargs=1, metavar='SEARCH',
                         action='store',
                         help="Searches for the movie. (e.g. --search 'avengers')")
-
-    parser.add_argument('-d', '--download',
-                        action='store_true',
-                        help='Downloads torrent files in the torrents directory')
-
-    parser.add_argument('-c', '--checkstatus',
-                        action='store_true',
-                        help='Checks torrent status on qbittorrent localhost server')
-
-    parser.add_argument('-r', '--remove',
-                        action='store_true',
-                        help='Deletes torrents')
 
     args = parser.parse_args()
     if args.search:
