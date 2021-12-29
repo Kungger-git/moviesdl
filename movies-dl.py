@@ -5,7 +5,6 @@ from modules import nox
 from modules import colors as c
 from modules.run_once import run_once
 from modules.clear import clear
-from modules.getch import getch
 from modules.convert_string import StringConverter as sc
 from modules.error_handling import ErrorFunctions as ef
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
@@ -48,8 +47,7 @@ class MoviesDl():
             retry_flag = True
 
             while retry_flag == True:
-                print("\n{}Enter Choice: {}".format(c.RED, c.RESET), end='')
-                selection = int(getch())
+                selection = int(input("\n{}Enter Choice: {}".format(c.RED, c.RESET)))
 
                 if not selection in res:
                     print("\n{}Invalid Range.{}\n".format(c.RED, c.RESET))
@@ -97,8 +95,7 @@ class MoviesDl():
             retry_flag = True
 
             while retry_flag == True:
-                print("\n{}Enter Choice: {}".format(c.RED, c.RESET), end='')
-                selection = int(getch())
+                selection = int(input("\n{}Enter Choice: {}".format(c.RED, c.RESET)))
 
                 if not selection in res:
                     print("\n{}Invalid Range.{}\n".format(c.RED, c.RESET))
