@@ -27,13 +27,13 @@ class MoviesDl():
 
         if result_movie['success'] != True:
             print(result_movie['error_msg'])
-            exitProc() 
+            exProc() 
         elif result_movie['success'] == True:
             movie_results = fm.listMovieResults(result_movie['data'])
 
         if not 'data' in movie_results:
             print(movie_results['return_msg'])
-            exitProc() 
+            exProc() 
         elif 'data' in movie_results:
             res = movie_results['data']
             for movie in res:
@@ -51,7 +51,7 @@ class MoviesDl():
 
                 if not selection in res:
                     print("\n{}Invalid Range.{}\n".format(c.RED, c.RESET))
-                    exitProc() 
+                    exProc() 
                 elif selection in res:
                     for title in res[selection]:
                         clear()
@@ -60,7 +60,7 @@ class MoviesDl():
                         return {'title': title, 'movie_page_url': res[selection][title]}
         except KeyboardInterrupt:
             print('\nStopped!')
-            exitProc() 
+            exProc() 
 
     
     def selectQuality(self, movie):
@@ -75,13 +75,13 @@ class MoviesDl():
 
         if result_quality['success'] != True:
             print(result_quality['error_msg'])
-            exitProc() 
+            exProc() 
         elif result_quality['success'] == True:
             quality_results = fm.listVideoQualities(result_quality['data'])
             
         if not 'data' in quality_results:
             print(quality_results['return_msg'])
-            exitProc() 
+            exProc() 
         elif 'data' in quality_results:
             res = quality_results['data']
             for quality in res:
@@ -99,7 +99,7 @@ class MoviesDl():
 
                 if not selection in res:
                     print("\n{}Invalid Range.{}\n".format(c.RED, c.RESET))
-                    exitProc() 
+                    exProc() 
                 elif selection in res:
                     for quality in res[selection]:
                         clear()
@@ -108,7 +108,7 @@ class MoviesDl():
                         return {'quality': quality, 'torrent_url': res[selection][quality]}
         except KeyboardInterrupt:
             print('\nStopped!')
-            exitProc() 
+            exProc() 
 
 
     def getTorrent(self, torrent_info):
@@ -121,7 +121,7 @@ class MoviesDl():
         torrent_download = fm.downloadMovieTorrent(torrent_info['torrent_url'])
         if torrent_download['success'] != True:
             print(torrent_download['return_msg'])
-            exitProc() 
+            exProc() 
         elif torrent_download['success'] == True:
             clear()
             
@@ -138,7 +138,7 @@ class MoviesDl():
         auth = trnt.loginQbitClient()
         if not 'data' in auth:
             print(auth['return_msg'])
-            exitProc() 
+            exProc() 
         elif 'data' in auth:
             auth = auth['data']
             
@@ -150,7 +150,7 @@ class MoviesDl():
         api_auth = trnt.authorizeAPIAccess()
         if not 'data' in api_auth:
             print(api_auth['return_msg'])
-            exitProc() 
+            exProc() 
         elif 'data' in api_auth:
             api_auth = api_auth['data']
 
@@ -161,7 +161,7 @@ class MoviesDl():
                 status = trnt.statusCheck(api_auth)
                 if not 'data' in status:
                     print(status['return_msg'])
-                    exitProc() 
+                    exProc() 
                 elif 'data' in status:
                     status = status['data']
                 
@@ -213,7 +213,7 @@ def errorMessage(name):
         c.BLUE, name, c.RESET))
 
 
-def exitProc():
+def exProc():
     nox.killQbittorrent()
     exit(0)
 
@@ -227,7 +227,7 @@ def main(query):
     torrent = md.getTorrent(quality)
 
     md.downloadMovies()
-    exitProc()
+    exProc()
 
 
 if __name__ == '__main__':
