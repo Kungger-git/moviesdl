@@ -1,4 +1,4 @@
-<h1 align="center"> movies-dl </h1>
+<h1 align="center"> moviesdl </h1>
 <p align="center">Download Movie Torrents as easy as 1, 2, 3
 <img src="img/movies-dl.gif" />
 </p>
