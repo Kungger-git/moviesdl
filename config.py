@@ -62,18 +62,18 @@ rating = 0
 
 """
 Available Sorting options:
-- latest(default)
+- rating (default)
 - oldest
 - featured
 - seeds
 - peers
 - year
-- rating
+- latest
 - likes
 - alphabetical
 - downloads
 """
-order = "latest"
+order = "rating"
 
 """ 
 Available Year options:
@@ -91,8 +91,97 @@ Available Year options:
 """
 year = "0"
 
-""" Language """
-lang = "all"
+""" Available Language Options:
+- en (English, default)
+- all
+- foreign
+- fr (French)
+- ja (Japanese)
+- it (Italian)
+- es (Spanish)
+- de (German)
+- zh (Chinese)
+- ko (Korean)
+- cn (Cantonese)
+- hi (Hindi)
+- ru (Russian)
+- sv (Swedish)
+- pt (Portuguese)
+- pl (Polish)
+- th (Thai)
+- da (Danish)
+- nl (Dutch)
+- no (Norwegian)
+- ta (Tamil)
+- te (Telugu)
+- vi (Vietnamese)
+- fi (Finnish)
+- cs (Czech)
+- tr (Turkish)
+- id (Indonesian)
+- fa (Persian)
+- el (Greek)
+- tl (Tagalog)
+- hu (Hungarian)
+- ar (Arabic)
+- he (Hebrew)
+- ro (Romanian)
+- et (Estonian)
+- bn (Bangla)
+- ur (Urdu)
+- ms (Malay)
+- is (Icelandic)
+- ml (Malayalam)
+- uk (Ukrainian)
+- sr (Serbian)
+- xx (xx)
+- ca (Catalan)
+- sk (Slovak)
+- pa (Punjabi)
+- af (Afrikaans)
+- wo (Wolof)
+- ka (Georgian)
+- mr (Marathi)
+- eu (Basque)
+- lv (Latvian)
+- bo (Tibetan)
+- kn (Kannada)
+- am (Amharic)
+- gl (Galician)
+- la (Latin)
+- bs (Bosnian)
+- ak (Akan)
+- sh (Serbo-Croatian)
+- lt (Lithuanian)
+- mn (Mongolian)
+- nb (Norwegian Bokmal)
+- sw (Swahili)
+- iu (Inuktitut)
+- so (Somali)
+- cy (Welsh)
+- st (Southern Sotho)
+- lg (Ganda)
+- be (Belarusian)
+- hy (Armenian)
+- hr (Croatian)
+- zu (Zulu)
+- ig (Igbo)
+- ku (Kurdish)
+- ab (Abkhazian)
+- az (Azerbaijani)
+- ht (Haitian Creole)
+- ky (Kyrgyz)
+- ps (Pashto)
+- lb (Luxembourgish)
+- ga (Irish)
+- mi (Maori)
+- aa (Afar)
+- km (Khmer)
+- yi (Yiddish)
+- mk (Macedonian)
+- os (Ossetic)
+"""
+lang = "en"
 
 header = {'browse': 'browse-movies', 'movie-page': 'movies'}
 url = "https://yts.mx/"
